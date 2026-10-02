@@ -1,0 +1,24 @@
+{
+  "name": "@lalml/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
