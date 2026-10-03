@@ -34,19 +34,21 @@ Read `docs/PLAN.md` for the architecture, data model and roadmap before starting
 - `pnpm install`
 - `pnpm dev`: run the API (http://localhost:8787) and web app (http://localhost:3000).
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`: the same checks CI runs on every pull request. Database tests run on PGlite (in-memory Postgres with PostGIS) via `@lalml/db/testing`, never a real database.
+- `pnpm shows:paste <file> [--commit]`: bulk-paste show entry (`packages/ingest/src/paste`, format in `docs/BULK_PASTE.md`). Dry run by default. Never `--commit` sample or test data to the real database.
 - `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:verify`: apply migrations, seed neighborhoods and `data/venues.csv`, and check the live database (extensions, search_path, RLS, triggers).
 
 ## API notes
 
 - `apps/api/src/index.ts` is the Vercel entry: it must import `hono` itself and `export default` the root app. Vercel's Hono preset rejects the build otherwise. The local Node server is `src/dev.ts`.
-- Health (`/v1/health`) pings the database with a 2s timeout and returns `{ status, db }`, never error details. It is never cached.
+- Health (`/v1/health`) pings the database with a 5s timeout (room for a cold start) and returns `{ status, db }`, never error details. It is never cached.
 - CORS: any origin may GET `/v1/*`. `/v1/admin/*` deliberately gets no CORS headers; restrict its origins in `lib/cors.ts` when admin routes exist.
 - Interactive docs are at `/docs` (Scalar), rendered from `/v1/openapi.json`.
 - Never log a connection string. Log errors through `logError` (`lib/redact.ts`), which strips credentials.
 
 - Errors are always `{ error: { code, message } }`. Throw `ApiError` from handlers; build routers with `createRouter()` so validation errors use the same shape.
 - Every GET response gets `Cache-Control` from `lib/cache.ts`. List endpoints use opaque cursors (`lib/pagination.ts`) and return `{ data, next_cursor }`.
-- "Tonight" for a venue lasts until 5am local time (`currentNight` in `lib/time.ts`), so late sets stay listed under their night.
+- "Tonight" for a venue lasts until 5am local time (`currentNight` in `lib/time.ts`; the cutoff is `NIGHT_ENDS_AT_HOUR` in `@lalml/db`, shared with the paste parser), so late sets stay listed under their night.
+- Every endpoint that returns events goes through `lib/events.ts`: `listEvents` applies the public filter (never draft or hidden; cancelled kept), ordering and cursor, and `serializeEvent` gives one event shape everywhere. `/v1/events` and `/v1/map` share `EventFilterQuery` / `eventFilterConditions`; the window is capped at 7 days.
 
 ## Building like Vercel
 

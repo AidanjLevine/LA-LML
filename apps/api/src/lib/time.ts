@@ -3,16 +3,9 @@
  * Minutes from 1440 up are after midnight, so a 1am set on Friday's show is 1500 dated Friday.
  */
 
-/** Before this local hour, "tonight" still means the previous date, so late sets stay listed. */
-export const NIGHT_ENDS_AT_HOUR = 5;
+import { formatMinutes, NIGHT_ENDS_AT_HOUR } from "@lalml/db";
 
-/** 1500 -> "1:00 AM", 1230 -> "8:30 PM". */
-export function formatMinutes(minutes: number): string {
-  const hour24 = Math.floor(minutes / 60) % 24;
-  const minute = minutes % 60;
-  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
-  return `${hour12}:${String(minute).padStart(2, "0")} ${hour24 < 12 ? "AM" : "PM"}`;
-}
+export { formatMinutes } from "@lalml/db";
 
 export const timeOf = (minutes: number | null) =>
   minutes === null ? null : { minutes, time: formatMinutes(minutes) };

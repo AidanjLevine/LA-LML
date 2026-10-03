@@ -21,6 +21,10 @@ pnpm dev
 
 Tests don't need a database: they run against PGlite, an in-memory Postgres with PostGIS.
 
+### Entering shows
+
+Until the admin pages exist, shows are entered from a text file with `pnpm shows:paste <file>` (a dry run) and then `pnpm shows:paste <file> --commit`. The format and rules are in [`docs/BULK_PASTE.md`](docs/BULK_PASTE.md); `samples/paste-example.txt` is an example.
+
 Checks (the same ones CI runs on pull requests):
 
 ```sh
