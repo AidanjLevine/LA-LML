@@ -7,6 +7,8 @@ export type AppEnv = {
     /** Lazily connects on first use, so routes that don't need the database work without one. */
     db: () => Db;
     now: () => Date;
+    /** How long /v1/health waits for the database. */
+    dbTimeoutMs: number;
   };
 };
 

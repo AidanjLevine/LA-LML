@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { REPO_ROOT } from "../env.js";
+import { REPO_ROOT } from "../local-env.js";
 import { neighborhoods, sources, venues } from "../schema/index.js";
 import { createTestDb } from "../testing.js";
 import { seed, slugify } from "./seed.js";

@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import { loadRootEnv } from "./src/env.js";
+import { loadRootEnv } from "./src/local-env.js";
 
 loadRootEnv();
 

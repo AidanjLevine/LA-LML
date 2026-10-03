@@ -1,0 +1,13 @@
+{
+  // Compiles src to plain ESM JS in dist/, which is what production (Vercel) imports.
+  // Local dev, tests and typecheck use src directly through the "development" export condition.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}

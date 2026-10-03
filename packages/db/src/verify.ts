@@ -1,8 +1,14 @@
 // pnpm db:verify: checks the live database over both connection strings.
 // Never prints connection strings (they contain the password).
 import postgres from "postgres";
-import { EXTENSION_SCHEMAS, TABLES_WITHOUT_RLS, TABLES_WITHOUT_UPDATED_AT_TRIGGER } from "./checks.js";
-import { loadRootEnv } from "./env.js";
+import {
+  classifyRestRead,
+  classifyRestWrite,
+  EXTENSION_SCHEMAS,
+  TABLES_WITHOUT_RLS,
+  TABLES_WITHOUT_UPDATED_AT_TRIGGER,
+} from "./checks.js";
+import { loadRootEnv } from "./local-env.js";
 
 loadRootEnv();
 let failed = false;
@@ -52,7 +58,8 @@ for (const [label, envName] of [
   }
 }
 
-// Supabase's auto-generated REST API must not read or write anything (RLS on, no policies).
+// Supabase's auto-generated REST API must not read or write anything: either the Data API is disabled
+// (this project's setup) or RLS with no policies blocks it. The RLS checks above apply either way.
 const supabaseUrl = process.env.SUPABASE_URL;
 const anonKey = process.env.SUPABASE_ANON_KEY;
 console.log("\nSupabase REST API (anon key)");
@@ -60,17 +67,12 @@ if (!supabaseUrl || !anonKey) {
   console.log("  skipped: set SUPABASE_URL and SUPABASE_ANON_KEY to check");
 } else {
   const headers = { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" };
-  // Only a real denial passes. A 5xx (e.g. PGRST002 while PostgREST reloads its schema cache) is inconclusive.
   const read = await fetch(`${supabaseUrl}/rest/v1/venues?select=slug&limit=5`, { headers });
-  const readBody = (await read.json().catch(() => null)) as unknown;
-  const readDenied =
-    (read.status === 200 && Array.isArray(readBody) && readBody.length === 0) || [401, 403, 404].includes(read.status);
-  check(readDenied, "anon read of venues returns nothing", `${read.status} ${JSON.stringify(readBody)}`);
-  // An empty insert: RLS rejects it with 42501. A NOT NULL error (23502) would mean RLS let it through.
+  const readResult = classifyRestRead(read.status, await read.json().catch(() => null));
+  check(readResult.locked, "anon can't read venues", readResult.detail);
   const write = await fetch(`${supabaseUrl}/rest/v1/neighborhoods`, { method: "POST", headers, body: "{}" });
-  const body = (await write.json().catch(() => ({}))) as { code?: string; message?: string };
-  const writeDenied = body.code === "42501" || [401, 403].includes(write.status);
-  check(writeDenied, "anon insert is rejected", `${write.status} ${body.code ?? ""} ${body.message ?? ""}`.trim());
+  const writeResult = classifyRestWrite(write.status, await write.json().catch(() => null));
+  check(writeResult.locked, "anon can't insert into neighborhoods", writeResult.detail);
 }
 
 console.log(failed ? "\nSome checks failed." : "\nAll checks passed.");

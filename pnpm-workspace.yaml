@@ -5,3 +5,12 @@ allowBuilds:
   esbuild: true
   sharp: false
   unrs-resolver: false
+
+# Vercel's Hono builder type-checks without following pnpm's symlinks, so packages that types
+# depend on must be findable by walking up from apps/api. @types/node needs undici-types (the
+# fetch Request/Response types); hoisting it to the root node_modules makes it findable.
+# Setting this replaces pnpm's defaults, so those (*eslint*, *prettier*) are listed too.
+publicHoistPattern:
+  - "*eslint*"
+  - "*prettier*"
+  - undici-types
