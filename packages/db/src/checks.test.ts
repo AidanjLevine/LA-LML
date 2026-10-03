@@ -7,6 +7,8 @@ describe("Supabase REST lockdown checks", () => {
   it("count a disabled Data API as locked down", () => {
     expect(classifyRestRead(503, PGRST002)).toEqual({ locked: true, detail: "Data API disabled (503 PGRST002)" });
     expect(classifyRestWrite(503, PGRST002)).toEqual({ locked: true, detail: "Data API disabled (503 PGRST002)" });
+    expect(classifyRestRead(404, null)).toEqual({ locked: true, detail: "Data API disabled (404)" });
+    expect(classifyRestWrite(404, { message: "Not Found" })).toEqual({ locked: true, detail: "Data API disabled (404)" });
   });
 
   it("count RLS denials as locked down", () => {

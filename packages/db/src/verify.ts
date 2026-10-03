@@ -8,7 +8,7 @@ import {
   TABLES_WITHOUT_RLS,
   TABLES_WITHOUT_UPDATED_AT_TRIGGER,
 } from "./checks.js";
-import { loadRootEnv } from "./env.js";
+import { loadRootEnv } from "./local-env.js";
 
 loadRootEnv();
 let failed = false;

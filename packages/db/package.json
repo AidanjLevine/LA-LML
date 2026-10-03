@@ -4,11 +4,25 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./testing": "./src/testing.ts",
-    "./env": "./src/env.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./env": {
+      "development": "./src/env.ts",
+      "default": "./dist/env.js"
+    },
+    "./testing": {
+      "development": "./src/testing.ts",
+      "default": "./dist/testing.js"
+    },
+    "./local-env": {
+      "development": "./src/local-env.ts",
+      "default": "./dist/local-env.js"
+    }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/seed/run.ts",

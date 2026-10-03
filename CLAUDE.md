@@ -21,7 +21,7 @@ Read `docs/PLAN.md` for the architecture, data model and roadmap before starting
 ## Database notes
 
 - Every table in `public` has row level security enabled with no policies, so Supabase's auto-generated REST and GraphQL APIs can't read or write anything. Our server connects as the table owner and isn't affected. New tables must call `.enableRLS()` on the `pgTable`; tests fail otherwise.
-- Supabase's Data API is intentionally disabled in the dashboard, so its REST endpoint answers 503 PGRST002. That's expected, not an outage; `pnpm db:verify` counts it as locked down. RLS stays on as a second layer.
+- Supabase's Data API is intentionally disabled in the dashboard, so its REST endpoint answers 503 PGRST002 or 404. That's expected, not an outage; `pnpm db:verify` counts it as locked down. RLS stays on as a second layer.
 - `updated_at` is set by the `set_updated_at` trigger (migration 0003), not app code. New tables need a `CREATE TRIGGER <table>_set_updated_at` line in a custom migration; tests fail otherwise.
 - Two connection strings: `DATABASE_URL` (transaction pooler, port 6543, API runtime, prepared statements off) and `DATABASE_URL_SESSION` (session pooler, port 5432, migrations and seed). Both live in `.env` only.
 
@@ -38,6 +38,20 @@ Read `docs/PLAN.md` for the architecture, data model and roadmap before starting
 
 ## API notes
 
+- `apps/api/src/index.ts` is the Vercel entry: it must import `hono` itself and `export default` the root app. Vercel's Hono preset rejects the build otherwise. The local Node server is `src/dev.ts`.
+- Health (`/v1/health`) pings the database with a 2s timeout and returns `{ status, db }`, never error details. It is never cached.
+- CORS: any origin may GET `/v1/*`. `/v1/admin/*` deliberately gets no CORS headers; restrict its origins in `lib/cors.ts` when admin routes exist.
+- Interactive docs are at `/docs` (Scalar), rendered from `/v1/openapi.json`.
+- Never log a connection string. Log errors through `logError` (`lib/redact.ts`), which strips credentials.
+
 - Errors are always `{ error: { code, message } }`. Throw `ApiError` from handlers; build routers with `createRouter()` so validation errors use the same shape.
 - Every GET response gets `Cache-Control` from `lib/cache.ts`. List endpoints use opaque cursors (`lib/pagination.ts`) and return `{ data, next_cursor }`.
 - "Tonight" for a venue lasts until 5am local time (`currentNight` in `lib/time.ts`), so late sets stay listed under their night.
+
+## Building like Vercel
+
+- `@lalml/db` is a compiled package. Its `exports` map has a `development` condition pointing at `src/*.ts` (used by `tsc`, vitest and `pnpm dev`) and a `default` pointing at `dist/*.js` (used in production). `pnpm --filter @lalml/db build` writes `dist/`.
+- Production code must not import `@lalml/db/local-env` (the `.env` loader). Vercel's file tracer would bundle the repo's `.env`. Only scripts, tests and `dev.ts` may use it; `apps/api/src/bundle-safety.test.ts` enforces this.
+- `apps/api/tsconfig.json` repeats `target`, `module` and `moduleResolution` on purpose. Vercel's builder fills in defaults on that file before resolving `extends`, which would force `strict: false` and NodeNext.
+- `pnpm-workspace.yaml` hoists `undici-types` publicly. Vercel's type-check doesn't follow pnpm symlinks, and `@types/node` needs it for the `fetch` `Response` type.
+- To reproduce a Vercel build locally without logging in or deploying: create a gitignored `.vercel/project.json` at the repo root with placeholder `projectId`/`orgId` and `settings: { framework: "hono", rootDirectory: "apps/api" }`, then run `ENABLE_EXPERIMENTAL_COREPACK=1 npx vercel build`. Output lands in `.vercel/output`. Never run `vercel deploy --prebuilt` from a machine with a populated `.env`.

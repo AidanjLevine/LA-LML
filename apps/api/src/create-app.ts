@@ -1,25 +1,42 @@
 import type { Db } from "@lalml/db";
+import { Scalar } from "@scalar/hono-api-reference";
+import type { ErrorHandler, NotFoundHandler } from "hono";
 import { cacheHeaders } from "./lib/cache.js";
+import { corsMiddleware } from "./lib/cors.js";
 import { ApiError, errorBody } from "./lib/errors.js";
+import { logError } from "./lib/redact.js";
 import { createRouter } from "./lib/router.js";
 import { healthRouter } from "./routes/health.js";
 import { neighborhoodsRouter } from "./routes/neighborhoods.js";
 import { venuesRouter } from "./routes/venues.js";
 
 export type AppDeps = {
-  /** Called on first use per request; health checks never connect. */
+  /** Called on first use; returns the per-instance client. Routes that don't need it never connect. */
   db: () => Db;
   /** Injectable clock for tests. */
   now?: () => Date;
+  /** How long /v1/health waits for the database (ms). */
+  dbTimeoutMs?: number;
 };
 
-export function createApp({ db, now = () => new Date() }: AppDeps) {
+export const notFoundHandler: NotFoundHandler = (c) =>
+  c.json(errorBody("not_found", `No route for ${c.req.method} ${c.req.path}`), 404);
+
+export const errorHandler: ErrorHandler = (err, c) => {
+  if (err instanceof ApiError) return c.json(errorBody(err.code, err.message), err.status);
+  logError(`${c.req.method} ${c.req.path}`, err);
+  return c.json(errorBody("internal_error", "Something went wrong"), 500);
+};
+
+export function createApp({ db, now = () => new Date(), dbTimeoutMs = 2_000 }: AppDeps) {
   const app = createRouter();
 
   app.use("*", cacheHeaders);
+  app.use("/v1/*", corsMiddleware);
   app.use("*", async (c, next) => {
     c.set("db", db);
     c.set("now", now);
+    c.set("dbTimeoutMs", dbTimeoutMs);
     await next();
   });
 
@@ -36,12 +53,11 @@ export function createApp({ db, now = () => new Date() }: AppDeps) {
     },
   });
 
-  app.notFound((c) => c.json(errorBody("not_found", `No route for ${c.req.method} ${c.req.path}`), 404));
-  app.onError((err, c) => {
-    if (err instanceof ApiError) return c.json(errorBody(err.code, err.message), err.status);
-    console.error(err);
-    return c.json(errorBody("internal_error", "Something went wrong"), 500);
-  });
+  // Interactive docs, rendered from the spec above. Not part of the spec itself.
+  app.get("/docs", Scalar({ url: "/v1/openapi.json", pageTitle: "LA-LML API" }));
+
+  app.notFound(notFoundHandler);
+  app.onError(errorHandler);
 
   return app;
 }

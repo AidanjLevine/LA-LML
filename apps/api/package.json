@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/dev.ts",
+    "dev": "tsx watch --conditions=development src/dev.ts",
+    "build": "pnpm --filter @lalml/db build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
@@ -12,6 +13,7 @@
   "dependencies": {
     "@hono/zod-openapi": "^1.6.3",
     "@lalml/db": "workspace:*",
+    "@scalar/hono-api-reference": "^0.12.8",
     "drizzle-orm": "^0.45.3",
     "hono": "^4.13.12",
     "zod": "^4.6.5"
@@ -22,5 +24,8 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

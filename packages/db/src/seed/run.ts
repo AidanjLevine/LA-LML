@@ -2,7 +2,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createDb } from "../client.js";
-import { loadRootEnv, REPO_ROOT, requireEnv } from "../env.js";
+import { requireEnv } from "../env.js";
+import { loadRootEnv, REPO_ROOT } from "../local-env.js";
 import { seed, type SeedReport } from "./seed.js";
 
 function print(report: SeedReport) {

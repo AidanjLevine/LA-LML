@@ -1,6 +1,6 @@
 // Local development server. Vercel does not use this file.
 import { serve } from "@hono/node-server";
-import { loadRootEnv } from "@lalml/db/env";
+import { loadRootEnv } from "@lalml/db/local-env";
 
 loadRootEnv();
 const { default: app } = await import("./index.js");
