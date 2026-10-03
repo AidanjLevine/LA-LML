@@ -13,7 +13,7 @@ export const sources = pgTable("sources", {
   config: jsonb("config").notNull().default(sql`'{}'::jsonb`),
   trustLevel: smallint("trust_level").notNull().default(0),
   ...timestamps,
-});
+}).enableRLS();
 
 export const sourceRecords = pgTable(
   "source_records",
@@ -39,7 +39,7 @@ export const sourceRecords = pgTable(
     index("source_records_review_status_idx").on(t.reviewStatus),
     index("source_records_event_id_idx").on(t.eventId),
   ],
-);
+).enableRLS();
 
 // One event can have many sources.
 export const eventSources = pgTable(
@@ -58,7 +58,7 @@ export const eventSources = pgTable(
     unique("event_sources_event_id_source_record_id_unique").on(t.eventId, t.sourceRecordId),
     index("event_sources_source_record_id_idx").on(t.sourceRecordId),
   ],
-);
+).enableRLS();
 
 export const proposals = pgTable(
   "proposals",
@@ -79,4 +79,4 @@ export const proposals = pgTable(
     index("proposals_status_idx").on(t.status),
     index("proposals_target_idx").on(t.targetType, t.targetId),
   ],
-);
+).enableRLS();

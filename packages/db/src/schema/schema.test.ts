@@ -1,4 +1,5 @@
-import { getTableConfig } from "drizzle-orm/pg-core";
+import { is } from "drizzle-orm";
+import { getTableConfig, PgTable } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 import * as schema from "./index.js";
 import { parseEwkb } from "./columns.js";
@@ -21,6 +22,15 @@ describe("schema", () => {
     for (const table of tables) {
       const names = getTableConfig(table).columns.map((c) => c.name);
       expect(names).toEqual(expect.arrayContaining(["id", "created_at", "updated_at"]));
+    }
+  });
+
+  it("enables row level security on every exported table", () => {
+    const tables = Object.values(schema).filter((value) => is(value, PgTable));
+    expect(tables.length).toBe(11);
+    for (const table of tables) {
+      const config = getTableConfig(table);
+      expect(config.enableRLS, `${config.name} must call .enableRLS()`).toBe(true);
     }
   });
 });

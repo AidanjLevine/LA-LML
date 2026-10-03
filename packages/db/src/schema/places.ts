@@ -12,7 +12,7 @@ export const neighborhoods = pgTable("neighborhoods", {
   center: point("center").notNull(),
   zoom: real("zoom").notNull(),
   ...timestamps,
-});
+}).enableRLS();
 
 export const venues = pgTable(
   "venues",
@@ -40,4 +40,4 @@ export const venues = pgTable(
     index("venues_name_trgm_idx").using("gin", sql`${t.name} extensions.gin_trgm_ops`),
     index("venues_neighborhood_id_idx").on(t.neighborhoodId),
   ],
-);
+).enableRLS();

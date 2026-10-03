@@ -1,7 +1,9 @@
 // Local development server. Vercel does not use this file.
 import { serve } from "@hono/node-server";
-import { app } from "./app.js";
+import { loadRootEnv } from "@lalml/db/env";
 
+loadRootEnv();
+const { default: app } = await import("./index.js");
 const port = Number(process.env.PORT ?? 8787);
 
 serve({ fetch: app.fetch, port }, (info) => {

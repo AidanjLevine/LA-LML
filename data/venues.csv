@@ -1,0 +1,2 @@
+area,neighborhood,venue_name,address,latitude,longitude,capacity,age_policy,website,instagram,facebook,dice_url,calendar_lives_on,website_platform,has_ical_or_json_feed,newsletter_signup_url,shows_per_week_estimate,notes
+Eastside,Echo Park,Example Bar,"123 Example Ave, Los Angeles, CA 90026",34.0780,-118.2606,150,21+,https://example.com,@examplebar,,,website,squarespace,yes,https://example.com/newsletter,4,Delete this example row

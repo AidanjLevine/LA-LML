@@ -33,7 +33,7 @@ export const series = pgTable("series", {
   name: text("name").notNull(),
   recurrenceRule: text("recurrence_rule"),
   ...timestamps,
-});
+}).enableRLS();
 
 // Never delete events: set status to 'cancelled' instead.
 export const events = pgTable(
@@ -67,7 +67,7 @@ export const events = pgTable(
     check("events_doors_minutes_range", minutesInRange(t.doorsMinutes)),
     check("events_end_minutes_range", minutesInRange(t.endMinutes)),
   ],
-);
+).enableRLS();
 
 export const eventArtists = pgTable(
   "event_artists",
@@ -90,7 +90,7 @@ export const eventArtists = pgTable(
     index("event_artists_artist_id_idx").on(t.artistId),
     check("event_artists_set_start_minutes_range", minutesInRange(t.setStartMinutes)),
   ],
-);
+).enableRLS();
 
 export const prices = pgTable(
   "prices",
@@ -104,4 +104,4 @@ export const prices = pgTable(
     ...timestamps,
   },
   (t) => [index("prices_event_id_idx").on(t.eventId), check("prices_cents_nonnegative", sql`${t.cents} >= 0`)],
-);
+).enableRLS();
