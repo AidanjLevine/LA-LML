@@ -31,7 +31,7 @@ describe("seed", () => {
   it("seeds neighborhoods, the manual source and venues", async () => {
     const report = await seed(t.db, csv(ROWS.echo, ROWS.westside));
 
-    expect(report.neighborhoods).toBe(6);
+    expect(report.neighborhoods).toBe(7);
     expect(report.venuesInserted).toEqual(["the-echo", "seaside-room"]);
     expect(await t.db.select().from(sources)).toMatchObject([{ kind: "manual", name: "Seed data" }]);
 
@@ -60,7 +60,7 @@ describe("seed", () => {
     expect(second.venuesInserted).toEqual([]);
     expect(second.venuesUpdated).toEqual(["the-echo", "seaside-room"]);
     expect(await t.db.$count(venues)).toBe(2);
-    expect(await t.db.$count(neighborhoods)).toBe(6);
+    expect(await t.db.$count(neighborhoods)).toBe(7);
     expect(await t.db.$count(sources)).toBe(1);
   });
 

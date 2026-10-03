@@ -6,7 +6,7 @@ Reference for anyone working in this repo. It's a condensed copy of the full MVP
 
 A public API and a mobile-first web app for finding live shows by small bands and DJs at bars and venues in Los Angeles.
 
-- Launch areas: 10 venues on the Eastside (Echo Park, Silver Lake, Highland Park, Eagle Rock) and 10 in Santa Monica and Venice.
+- Launch areas: 20 venues across three regions: Eastside (Echo Park, Silver Lake), Central (Koreatown, Westlake) and Westside (West Hollywood, Santa Monica, Venice).
 - Launch features: a map of tonight's and this week's shows with a synced list, a venue list and venue pages, an artist list and artist pages, event pages, and an admin area.
 
 ## Architecture
@@ -81,7 +81,7 @@ Fast human entry comes first, as it does for Melbourne's Live Music Locator. Pha
 
 | Phase | Work | Gate |
 | --- | --- | --- |
-| 0. Venue audit | Record where each of the 20 venues' calendars lives; enter two weeks of shows as seed data | Seed data for 20 venues in two areas |
+| 0. Venue audit | Record where each of the 20 venues' calendars lives; enter two weeks of shows as seed data | Seed data for 20 venues across the launch areas |
 | 1. Foundation | Monorepo, schema, seed import, bulk-paste entry, API skeleton with OpenAPI, CI, first deploy | API serves seeded shows from a public URL |
 | 2. Base features | Map with synced list and filters, area switcher, venue and artist lists, venue, artist and event pages with JSON-LD, coverage panel | Map and lists work on a phone with real data |
 | 3. Ingestion v1 | Ticketmaster adapter, top venue-platform adapter, nightly jobs, artist matching, dedupe, proposals review queue | Public launch, most shows imported automatically |

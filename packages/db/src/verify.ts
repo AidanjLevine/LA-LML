@@ -60,13 +60,17 @@ if (!supabaseUrl || !anonKey) {
   console.log("  skipped: set SUPABASE_URL and SUPABASE_ANON_KEY to check");
 } else {
   const headers = { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" };
+  // Only a real denial passes. A 5xx (e.g. PGRST002 while PostgREST reloads its schema cache) is inconclusive.
   const read = await fetch(`${supabaseUrl}/rest/v1/venues?select=slug&limit=5`, { headers });
-  const rows = read.ok ? ((await read.json()) as unknown[]) : null;
-  check(rows === null || rows.length === 0, "anon read of venues returns nothing", `${read.status} ${rows ? `${rows.length} rows` : ""}`);
-  // An empty insert: blocked by RLS (42501) if locked down; a NOT NULL error would mean RLS let it through.
+  const readBody = (await read.json().catch(() => null)) as unknown;
+  const readDenied =
+    (read.status === 200 && Array.isArray(readBody) && readBody.length === 0) || [401, 403, 404].includes(read.status);
+  check(readDenied, "anon read of venues returns nothing", `${read.status} ${JSON.stringify(readBody)}`);
+  // An empty insert: RLS rejects it with 42501. A NOT NULL error (23502) would mean RLS let it through.
   const write = await fetch(`${supabaseUrl}/rest/v1/neighborhoods`, { method: "POST", headers, body: "{}" });
   const body = (await write.json().catch(() => ({}))) as { code?: string; message?: string };
-  check(!write.ok && body.code !== "23502", "anon insert is rejected", `${write.status} ${body.code ?? ""} ${body.message ?? ""}`.trim());
+  const writeDenied = body.code === "42501" || [401, 403].includes(write.status);
+  check(writeDenied, "anon insert is rejected", `${write.status} ${body.code ?? ""} ${body.message ?? ""}`.trim());
 }
 
 console.log(failed ? "\nSome checks failed." : "\nAll checks passed.");
