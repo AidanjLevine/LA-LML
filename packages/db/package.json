@@ -4,20 +4,30 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts",
+    "./env": "./src/env.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/seed/run.ts",
+    "db:verify": "tsx src/verify.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.3"
+    "csv-parse": "^7.0.3",
+    "drizzle-orm": "^0.45.3",
+    "postgres": "^3.4.9"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite-postgis": "^0.2.8",
     "@types/node": "^26.6.3",
     "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vitest": "^5.0.3"
   }

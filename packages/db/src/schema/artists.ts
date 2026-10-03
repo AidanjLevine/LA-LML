@@ -23,4 +23,4 @@ export const artists = pgTable(
     ...timestamps,
   },
   (t) => [index("artists_name_trgm_idx").using("gin", sql`${t.name} extensions.gin_trgm_ops`)],
-);
+).enableRLS();
