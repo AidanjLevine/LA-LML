@@ -21,6 +21,7 @@ Read `docs/PLAN.md` for the architecture, data model and roadmap before starting
 ## Database notes
 
 - Every table in `public` has row level security enabled with no policies, so Supabase's auto-generated REST and GraphQL APIs can't read or write anything. Our server connects as the table owner and isn't affected. New tables must call `.enableRLS()` on the `pgTable`; tests fail otherwise.
+- Supabase's Data API is intentionally disabled in the dashboard, so its REST endpoint answers 503 PGRST002. That's expected, not an outage; `pnpm db:verify` counts it as locked down. RLS stays on as a second layer.
 - `updated_at` is set by the `set_updated_at` trigger (migration 0003), not app code. New tables need a `CREATE TRIGGER <table>_set_updated_at` line in a custom migration; tests fail otherwise.
 - Two connection strings: `DATABASE_URL` (transaction pooler, port 6543, API runtime, prepared statements off) and `DATABASE_URL_SESSION` (session pooler, port 5432, migrations and seed). Both live in `.env` only.
 

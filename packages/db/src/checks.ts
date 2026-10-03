@@ -27,3 +27,35 @@ export const EXTENSION_SCHEMAS = `
   from pg_extension e join pg_namespace n on n.oid = e.extnamespace
   where e.extname in ('postgis', 'pg_trgm')
   order by 1`;
+
+export type RestCheck = { locked: boolean; detail: string };
+type PostgrestError = { code?: string; message?: string };
+
+/**
+ * With the Data API disabled in the Supabase dashboard (how this project runs), PostgREST has no
+ * schema to serve and every request returns 503 PGRST002. Nothing can be read or written, so that
+ * counts as locked down.
+ */
+const dataApiDisabled = (status: number, body: unknown) =>
+  status === 503 && (body as PostgrestError | null)?.code === "PGRST002";
+
+/** Anon read of a table: locked if the Data API is off, the table isn't exposed, or RLS returns no rows. */
+export function classifyRestRead(status: number, body: unknown): RestCheck {
+  if (dataApiDisabled(status, body)) return { locked: true, detail: "Data API disabled (503 PGRST002)" };
+  if (status === 200 && Array.isArray(body)) {
+    return body.length === 0
+      ? { locked: true, detail: "RLS returned no rows" }
+      : { locked: false, detail: `returned ${body.length} rows` };
+  }
+  if ([401, 403, 404].includes(status)) return { locked: true, detail: `denied (${status})` };
+  return { locked: false, detail: `inconclusive: ${status} ${JSON.stringify(body)}` };
+}
+
+/** Anon insert of `{}`: locked if the Data API is off or RLS rejects it (42501). A NOT NULL error means RLS let it through. */
+export function classifyRestWrite(status: number, body: unknown): RestCheck {
+  if (dataApiDisabled(status, body)) return { locked: true, detail: "Data API disabled (503 PGRST002)" };
+  const error = (body ?? {}) as PostgrestError;
+  if (error.code === "42501") return { locked: true, detail: "RLS rejected the insert (42501)" };
+  if ([401, 403].includes(status)) return { locked: true, detail: `denied (${status})` };
+  return { locked: false, detail: `${status} ${error.code ?? ""} ${error.message ?? ""}`.trim() };
+}
