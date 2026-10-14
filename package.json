@@ -14,7 +14,8 @@
     "db:generate": "pnpm --filter @lalml/db db:generate",
     "db:migrate": "pnpm --filter @lalml/db db:migrate",
     "db:seed": "pnpm --filter @lalml/db db:seed",
-    "db:verify": "pnpm --filter @lalml/db db:verify"
+    "db:verify": "pnpm --filter @lalml/db db:verify",
+    "shows:paste": "pnpm --filter @lalml/ingest shows:paste"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

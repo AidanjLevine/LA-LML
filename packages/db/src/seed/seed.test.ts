@@ -4,7 +4,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../local-env.js";
 import { neighborhoods, sources, venues } from "../schema/index.js";
 import { createTestDb } from "../testing.js";
-import { seed, slugify } from "./seed.js";
+import { slugify } from "../slug.js";
+import { seed } from "./seed.js";
 
 const HEADER =
   "area,neighborhood,venue_name,address,latitude,longitude,capacity,age_policy,website,instagram,facebook,dice_url," +

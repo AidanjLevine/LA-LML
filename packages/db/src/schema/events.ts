@@ -23,6 +23,12 @@ import { venues } from "./places.js";
  */
 export const MAX_MINUTES = 2879;
 
+/**
+ * A night runs until this local hour. Times before it belong to the previous date (a 1am set is
+ * the night before), and "tonight" means yesterday's date until then. Shared by the API and ingest.
+ */
+export const NIGHT_ENDS_AT_HOUR = 5;
+
 const minutesInRange = (column: AnyPgColumn): SQL => sql`${column} between 0 and ${sql.raw(String(MAX_MINUTES))}`;
 
 export const series = pgTable("series", {

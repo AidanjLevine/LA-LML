@@ -6,7 +6,11 @@ import { corsMiddleware } from "./lib/cors.js";
 import { ApiError, errorBody } from "./lib/errors.js";
 import { logError } from "./lib/redact.js";
 import { createRouter } from "./lib/router.js";
+import { artistsRouter } from "./routes/artists.js";
+import { eventsRouter } from "./routes/events.js";
+import { genresRouter } from "./routes/genres.js";
 import { healthRouter } from "./routes/health.js";
+import { mapRouter } from "./routes/map.js";
 import { neighborhoodsRouter } from "./routes/neighborhoods.js";
 import { venuesRouter } from "./routes/venues.js";
 
@@ -28,7 +32,7 @@ export const errorHandler: ErrorHandler = (err, c) => {
   return c.json(errorBody("internal_error", "Something went wrong"), 500);
 };
 
-export function createApp({ db, now = () => new Date(), dbTimeoutMs = 2_000 }: AppDeps) {
+export function createApp({ db, now = () => new Date(), dbTimeoutMs = 5_000 }: AppDeps) {
   const app = createRouter();
 
   app.use("*", cacheHeaders);
@@ -43,6 +47,10 @@ export function createApp({ db, now = () => new Date(), dbTimeoutMs = 2_000 }: A
   app.route("/", healthRouter);
   app.route("/", neighborhoodsRouter);
   app.route("/", venuesRouter);
+  app.route("/", eventsRouter);
+  app.route("/", artistsRouter);
+  app.route("/", mapRouter);
+  app.route("/", genresRouter);
 
   app.doc31("/v1/openapi.json", {
     openapi: "3.1.0",

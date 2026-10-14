@@ -1,0 +1,16 @@
+# Sample bulk paste. Format: docs/BULK_PASTE.md
+# Dry run (writes nothing):  pnpm shows:paste samples/paste-example.txt
+# These are made-up shows: don't --commit this file to the real database.
+
+@example-bar
+source https://example.com/calendar
+
+Fri Oct 9 | 9pm | doors 8pm | The Lagoons (band), Paper Moons, DJ Soft Serve (dj) | $15 presale, $20 door | 21+ | https://tickets.example.com/lagoons
+Sat Oct 10 | 1am | Night Shift (dj) | free | 21+
+Sun Oct 11 | 7:30pm | "Crosby, Stills & Nosh" (cover) | $10
+Thu 10/15 | TBA | Open Mic Night (solo) | free | all ages
+Fri Oct 16 | 9pm | The Lagoonz, Paper Moons | $15
+
+# Not in the database yet: the dry run reports an unknown venue until it's seeded.
+@the-echo
+Sat Oct 17 | 8pm | Some Band | $12

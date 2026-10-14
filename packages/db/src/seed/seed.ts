@@ -1,6 +1,7 @@
 import { parse } from "csv-parse/sync";
 import { and, eq, sql } from "drizzle-orm";
 import type { Db } from "../client.js";
+import { slugify } from "../slug.js";
 import { neighborhoods, sources, venues } from "../schema/index.js";
 import { NEIGHBORHOODS } from "./neighborhoods.js";
 
@@ -21,16 +22,6 @@ export type SeedReport = {
 };
 
 type CsvRow = Record<string, string>;
-
-export function slugify(value: string): string {
-  return value
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 const blankToNull = (value: string | undefined) => (value?.trim() ? value.trim() : null);
 

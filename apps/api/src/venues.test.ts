@@ -251,6 +251,13 @@ describe("GET /v1/venues/{slug}/events", () => {
         { cents: 2000, description: "door" },
       ],
       last_verified_at: null,
+      venue: {
+        slug: "the-echo",
+        name: "The Echo",
+        neighborhood: { slug: "echo-park", name: "Echo Park" },
+        lat: 34.0779,
+        lng: -118.2606,
+      },
     });
     expect(body.data[3]).toMatchObject({ title: "Time TBA", start: null, lineup: [], prices: [] });
   });

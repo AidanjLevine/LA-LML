@@ -100,7 +100,14 @@ describe("docs", () => {
     const res = await app.request("/v1/openapi.json");
     const doc = (await res.json()) as { paths: Record<string, unknown> };
     expect(Object.keys(doc.paths).sort()).toEqual([
+      "/v1/artists",
+      "/v1/artists/{slug}",
+      "/v1/artists/{slug}/events",
+      "/v1/events",
+      "/v1/events/{id}",
+      "/v1/genres",
       "/v1/health",
+      "/v1/map",
       "/v1/neighborhoods",
       "/v1/venues",
       "/v1/venues/{slug}",
