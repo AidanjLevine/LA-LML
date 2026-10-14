@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../local-env.js";
 import { neighborhoods, sources, venues } from "../schema/index.js";
 import { createTestDb } from "../testing.js";
 import { slugify } from "../slug.js";
+import { NEIGHBORHOODS } from "./neighborhoods.js";
 import { seed } from "./seed.js";
 
 const HEADER =
@@ -32,7 +33,7 @@ describe("seed", () => {
   it("seeds neighborhoods, the manual source and venues", async () => {
     const report = await seed(t.db, csv(ROWS.echo, ROWS.westside));
 
-    expect(report.neighborhoods).toBe(7);
+    expect(report.neighborhoods).toBe(NEIGHBORHOODS.length);
     expect(report.venuesInserted).toEqual(["the-echo", "seaside-room"]);
     expect(await t.db.select().from(sources)).toMatchObject([{ kind: "manual", name: "Seed data" }]);
 
@@ -61,7 +62,7 @@ describe("seed", () => {
     expect(second.venuesInserted).toEqual([]);
     expect(second.venuesUpdated).toEqual(["the-echo", "seaside-room"]);
     expect(await t.db.$count(venues)).toBe(2);
-    expect(await t.db.$count(neighborhoods)).toBe(7);
+    expect(await t.db.$count(neighborhoods)).toBe(NEIGHBORHOODS.length);
     expect(await t.db.$count(sources)).toBe(1);
   });
 
@@ -91,10 +92,19 @@ describe("seed", () => {
     ]);
   });
 
-  it("reads the committed template CSV", async () => {
+  it("seeds the launch neighborhoods", () => {
+    expect(NEIGHBORHOODS).toHaveLength(9);
+    expect(new Set(NEIGHBORHOODS.map((n) => n.slug)).size).toBe(NEIGHBORHOODS.length);
+  });
+
+  it("reads the committed venues CSV without skips or warnings", async () => {
     const report = await seed(t.db, readFileSync(`${REPO_ROOT}data/venues.csv`, "utf8"));
     expect(report.skipped).toEqual([]);
-    expect(report.venuesInserted.length).toBeGreaterThan(0);
+    expect(report.warnings).toEqual([]);
+    expect(report.venuesInserted).toHaveLength(21);
+    expect(report.venuesInserted).toContain("mccabes-guitar-shop");
+    const unassigned = await t.db.$count(venues, isNull(venues.neighborhoodId));
+    expect(unassigned).toBe(0);
   });
 
   it("rejects a CSV missing required columns", async () => {
@@ -107,5 +117,7 @@ describe("slugify", () => {
     expect(slugify("The Echo")).toBe("the-echo");
     expect(slugify("Zebulon & Friends!")).toBe("zebulon-and-friends");
     expect(slugify("  Café Tropical ")).toBe("cafe-tropical");
+    expect(slugify("McCabe's Guitar Shop")).toBe("mccabes-guitar-shop");
+    expect(slugify("Harvelle’s")).toBe("harvelles");
   });
 });
