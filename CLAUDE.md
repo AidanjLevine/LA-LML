@@ -36,6 +36,7 @@ Read `docs/PLAN.md` for the architecture, data model and roadmap before starting
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`: the same checks CI runs on every pull request. Database tests run on PGlite (in-memory Postgres with PostGIS) via `@lalml/db/testing`, never a real database.
 - `pnpm shows:paste <file> [--commit]`: bulk-paste show entry (`packages/ingest/src/paste`, format in `docs/BULK_PASTE.md`). Dry run by default. Never `--commit` sample or test data to the real database.
 - `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:verify`: apply migrations, seed neighborhoods and `data/venues.csv`, and check the live database (extensions, search_path, RLS, triggers).
+- `pnpm db:remove-venue <slug> [--commit]`: delete one venue that's no longer in `data/venues.csv`. Dry run by default; refuses if it has events, series or proposals (set `status` to `inactive` instead). There's deliberately no "remove everything not in the CSV" mode.
 
 ## API notes
 

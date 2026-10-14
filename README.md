@@ -21,6 +21,8 @@ pnpm dev
 
 Tests don't need a database: they run against PGlite, an in-memory Postgres with PostGIS.
 
+The seed adds and updates, it never deletes. To remove a venue after taking it out of `data/venues.csv`, run `pnpm db:remove-venue <slug>` (dry run), then add `--commit`. It only deletes a venue with no events, series or proposals.
+
 ### Entering shows
 
 Until the admin pages exist, shows are entered from a text file with `pnpm shows:paste <file>` (a dry run) and then `pnpm shows:paste <file> --commit`. The format and rules are in [`docs/BULK_PASTE.md`](docs/BULK_PASTE.md); `samples/paste-example.txt` is an example.

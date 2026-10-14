@@ -7,4 +7,6 @@ export const NEIGHBORHOODS = [
   { slug: "west-hollywood", name: "West Hollywood", region: "westside", center: { x: -118.3617, y: 34.09 }, zoom: 14 },
   { slug: "santa-monica", name: "Santa Monica", region: "westside", center: { x: -118.4912, y: 34.0195 }, zoom: 13 },
   { slug: "venice", name: "Venice", region: "westside", center: { x: -118.4695, y: 33.985 }, zoom: 14 },
+  { slug: "culver-city", name: "Culver City", region: "westside", center: { x: -118.3965, y: 34.0211 }, zoom: 13 },
+  { slug: "palms", name: "Palms", region: "westside", center: { x: -118.4045, y: 34.0255 }, zoom: 14 },
 ] as const;

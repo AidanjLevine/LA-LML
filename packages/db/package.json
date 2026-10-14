@@ -26,6 +26,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/seed/run.ts",
+    "db:remove-venue": "tsx src/seed/remove-venue-run.ts",
     "db:verify": "tsx src/verify.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
