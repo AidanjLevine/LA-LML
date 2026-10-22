@@ -93,7 +93,8 @@ describe("seed", () => {
   });
 
   it("seeds the launch neighborhoods", () => {
-    expect(NEIGHBORHOODS).toHaveLength(9);
+    expect(NEIGHBORHOODS).toHaveLength(18);
+    expect([...new Set(NEIGHBORHOODS.map((n) => n.region))].sort()).toEqual(["central", "eastside", "pasadena", "valley", "westside"]);
     expect(new Set(NEIGHBORHOODS.map((n) => n.slug)).size).toBe(NEIGHBORHOODS.length);
   });
 
@@ -101,10 +102,16 @@ describe("seed", () => {
     const report = await seed(t.db, readFileSync(`${REPO_ROOT}data/venues.csv`, "utf8"));
     expect(report.skipped).toEqual([]);
     expect(report.warnings).toEqual([]);
-    expect(report.venuesInserted).toHaveLength(21);
+    expect(report.venuesInserted).toHaveLength(37);
     expect(report.venuesInserted).toContain("mccabes-guitar-shop");
     const unassigned = await t.db.$count(venues, isNull(venues.neighborhoodId));
     expect(unassigned).toBe(0);
+    const [bakedPotato] = await t.db
+      .select({ region: venues.region, neighborhood: neighborhoods.slug })
+      .from(venues)
+      .innerJoin(neighborhoods, eq(neighborhoods.id, venues.neighborhoodId))
+      .where(eq(venues.slug, "the-baked-potato"));
+    expect(bakedPotato).toEqual({ region: "valley", neighborhood: "studio-city" });
   });
 
   it("rejects a CSV missing required columns", async () => {
